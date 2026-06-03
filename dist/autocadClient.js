@@ -2,6 +2,9 @@ import axios from 'axios';
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 const PLUGIN_URL = process.env.AUTOCAD_PLUGIN_URL || "http://localhost:12345";
 const AUTH_TOKEN = process.env.MCP_AUTOCAD_TOKEN || "default-secret-token";
+// Large real-world drawings (tens of thousands of entities) can take well over
+// 5s to traverse model space. Make the timeout generous and configurable.
+const REQUEST_TIMEOUT = Number(process.env.AUTOCAD_PLUGIN_TIMEOUT_MS) || 120000;
 /**
  * Checks whether the AutoCAD plugin is reachable (non-throwing).
  * Returns true if the plugin responds with any HTTP status ≤ 499.
@@ -29,7 +32,7 @@ export async function sendAutoCADCommand(command, args = {}) {
             headers: {
                 "Authorization": `Bearer ${AUTH_TOKEN}`
             },
-            timeout: 5000 // 5 seconds timeout
+            timeout: REQUEST_TIMEOUT
         });
         if (response.data && response.data.error) {
             throw new Error(`Plugin Error: ${response.data.error}`);

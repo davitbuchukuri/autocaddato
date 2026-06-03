@@ -3,6 +3,9 @@ import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 
 const PLUGIN_URL = process.env.AUTOCAD_PLUGIN_URL || "http://localhost:12345";
 const AUTH_TOKEN = process.env.MCP_AUTOCAD_TOKEN || "default-secret-token";
+// Large real-world drawings (tens of thousands of entities) can take well over
+// 5s to traverse model space. Make the timeout generous and configurable.
+const REQUEST_TIMEOUT = Number(process.env.AUTOCAD_PLUGIN_TIMEOUT_MS) || 120000;
 
 export interface AutoCADResponse {
     status?: string;
@@ -37,7 +40,7 @@ export async function sendAutoCADCommand(command: string, args: Record<string, a
             headers: {
                 "Authorization": `Bearer ${AUTH_TOKEN}`
             },
-            timeout: 5000 // 5 seconds timeout
+            timeout: REQUEST_TIMEOUT
         });
 
         if (response.data && response.data.error) {

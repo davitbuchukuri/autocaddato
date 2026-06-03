@@ -1473,9 +1473,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     purge_drawing: "PurgeDrawing",
   };
 
+  // The plugin's CommandProcessor matches command names case-insensitively but
+  // expects the snake_case names (e.g. "count_entities"), NOT the PascalCase
+  // method names. The map below is only used as an allow-list; we forward the
+  // original snake_case tool name so the plugin's switch actually matches.
   const pluginCommand = pluginCommandMap[name];
   if (pluginCommand) {
-    return pluginForward(pluginCommand, args);
+    return pluginForward(name, args);
   }
 
   throw new McpError(ErrorCode.MethodNotFound, `Tool not found: ${name}`);
